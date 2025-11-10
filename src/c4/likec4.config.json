@@ -1,0 +1,13 @@
+{
+  "$schema": "https://likec4.dev/schemas/config.json",
+  "name": "mission-architecture",
+  "styles": {
+    "theme": {
+      "colors": {
+        "primary": "#A855F7",
+        "secondary": "#7C3AED",
+        "background": "#0f0f17"
+      }
+    }
+  }
+}

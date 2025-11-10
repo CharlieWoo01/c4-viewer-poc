@@ -1,0 +1,16 @@
+{
+  "name": "c4-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:c4": "likec4 build src/c4 -o ./dist --use-dot --use-hash-history && likec4 export json src/c4 --outfile ./exports/views.json --use-dot",
+    "serve:c4": "npx serve dist -s -l 62001",
+    "preview:c4": "npm run build:c4 && npm run serve:c4",
+    "export:c4": "likec4 export json src/c4 --outfile ./exports/likec4.json --use-dot"
+  },
+  "devDependencies": {
+    "likec4": "^1.44.0",
+    "serve": "^14.2.3"
+  }
+}

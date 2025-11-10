@@ -1,0 +1,193 @@
+// ✅ Fully valid LikeC4 v1.38 syntax
+// Coordinator -> multiple L2 services -> Kafka + Mongo
+
+specification {
+  element actor
+  element system
+  element component
+  element queue
+  element datastore
+}
+
+model {
+
+  actor client 'External Client' {
+    description 'Public consumer calling Coordinator APIs'
+  }
+
+  actor admin 'Admin Dashboard' {
+    description 'Internal administrator using internal APIs'
+  }
+
+  system coordinator 'Coordinator Service' {
+    description 'Handles orchestration between all L2 services'
+    style { icon tech:spring shape rectangle }
+
+    component gateway 'API Gateway' {
+      description 'Routes and authenticates requests'
+      style { icon tech:nginx shape rectangle }
+    }
+
+    component orchestrator 'Coordinator Core' {
+      description 'Coordinates cross-service workflows'
+      style { icon tech:java shape rectangle }
+    }
+
+    gateway -> orchestrator 'routes traffic'
+  }
+
+  queue kafka 'Kafka Cluster' {
+    description 'Event streaming platform for all L2 services'
+    style { icon tech:kafka shape queue }
+  }
+
+  datastore globalmongo 'Mongo Cluster' {
+    description 'Shared MongoDB storage for persistent data'
+    style { icon tech:mongodb shape cylinder }
+  }
+
+  // ---- Ten example L2 services ----
+  system l2teams 'L2 Teams Service' {
+    component api 'Teams API'
+    component consumer 'Teams Consumer'
+    datastore db 'Teams Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2matches 'L2 Matches Service' {
+    component api 'Matches API'
+    component consumer 'Matches Consumer'
+    datastore db 'Matches Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2stats 'L2 Stats Service' {
+    component api 'Stats API'
+    component consumer 'Stats Consumer'
+    datastore db 'Stats Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2awards 'L2 Awards Service' {
+    component api 'Awards API'
+    component consumer 'Awards Consumer'
+    datastore db 'Awards Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2notifications 'L2 Notifications Service' {
+    component api 'Notifications API'
+    component consumer 'Notifications Consumer'
+    datastore db 'Notifications Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2payments 'L2 Payments Service' {
+    component api 'Payments API'
+    component consumer 'Payments Consumer'
+    datastore db 'Payments Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2analytics 'L2 Analytics Service' {
+    component api 'Analytics API'
+    component consumer 'Analytics Consumer'
+    datastore db 'Analytics Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2reporting 'L2 Reporting Service' {
+    component api 'Reporting API'
+    component consumer 'Reporting Consumer'
+    datastore db 'Reporting Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2users 'L2 Users Service' {
+    component api 'Users API'
+    component consumer 'Users Consumer'
+    datastore db 'Users Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  system l2discord 'L2 Discord Service' {
+    component api 'Discord API'
+    component consumer 'Discord Consumer'
+    datastore db 'Discord Mongo'
+    api -> consumer 'publishes domain events'
+    consumer -> db 'persists data'
+  }
+
+  // ---- Relationships between systems ----
+  client -> coordinator 'invokes public endpoints'
+  admin -> coordinator 'manages configuration'
+
+  coordinator -> kafka 'publishes orchestration events'
+
+  // Coordinator <-> L2
+  coordinator -> l2teams 'delegates to Teams'
+  coordinator -> l2matches 'delegates to Matches'
+  coordinator -> l2stats 'delegates to Stats'
+  coordinator -> l2awards 'delegates to Awards'
+  coordinator -> l2notifications 'delegates to Notifications'
+  coordinator -> l2payments 'delegates to Payments'
+  coordinator -> l2analytics 'delegates to Analytics'
+  coordinator -> l2reporting 'delegates to Reporting'
+  coordinator -> l2users 'delegates to Users'
+  coordinator -> l2discord 'delegates to Discord'
+
+  // L2 -> infra
+  l2teams -> kafka 'publishes domain events'
+  l2matches -> kafka 'publishes domain events'
+  l2stats -> kafka 'publishes domain events'
+  l2awards -> kafka 'publishes domain events'
+  l2notifications -> kafka 'publishes domain events'
+  l2payments -> kafka 'publishes domain events'
+  l2analytics -> kafka 'publishes domain events'
+  l2reporting -> kafka 'publishes domain events'
+  l2users -> kafka 'publishes domain events'
+  l2discord -> kafka 'publishes domain events'
+
+  kafka -> l2analytics 'delivers topic events'
+  kafka -> l2reporting 'delivers topic events'
+
+  l2teams -> globalmongo 'persists team data'
+  l2matches -> globalmongo 'persists match data'
+  l2stats -> globalmongo 'persists stats data'
+  l2awards -> globalmongo 'persists awards data'
+  l2notifications -> globalmongo 'persists notification data'
+  l2payments -> globalmongo 'persists payment data'
+  l2analytics -> globalmongo 'persists analytics data'
+  l2reporting -> globalmongo 'persists reports'
+  l2users -> globalmongo 'persists user data'
+  l2discord -> globalmongo 'persists Discord data'
+}
+
+views {
+  view index {
+    title 'Microservice Landscape (Coordinator + L2s)'
+    include *
+    autoLayout LeftRight
+  }
+
+  view coordinator of coordinator {
+    title 'Coordinator Detail'
+    include *
+    autoLayout TopBottom
+  }
+
+  view l2analytics of l2analytics {
+    title 'Analytics Service Detail'
+    include *
+    autoLayout TopBottom
+  }
+}
