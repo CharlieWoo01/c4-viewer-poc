@@ -1,16 +1,17 @@
 # C4 Viewer
 
-A minimal **C4 architecture diagram viewer** powered by [LikeC4](https://likec4.dev).
-This setup uses the **LikeC4 CLI only** (no React, no Vite) for generating, exporting, and previewing interactive architecture diagrams.
+A minimal **C4 architecture diagram viewer** powered by [LikeC4](https://likec4.dev).  
+This setup uses the **LikeC4 CLI only** (no React, no Vite) to **generate, export, and preview** interactive architecture diagrams — ideal for CI/CD and static hosting (e.g. **GitHub Pages**).
 
 ---
 
 ## Features
 
-- 🚀 Fast CLI-based workflow — no frontend build required
-- 🧩 Uses **Graphviz** for layout rendering (via system binary or WebAssembly)
-- ⚙️ Perfect for local and CI/CD use
-- 📄 Supports HTML builds, JSON exports, and static previews
+- ⚡ **CLI-based workflow** — no frontend build stack required  
+- 🧠 **Graphviz** or **WASM** layout engines  
+- 💾 **Static export** ready for Pages or any web host  
+- 🧩 **JSON export** for automation, dashboards, or analysis  
+- ☁️ **CI-ready** with `--use-dot` and GitHub Actions support  
 
 ---
 
@@ -20,37 +21,37 @@ Install dependencies:
 
 ```bash
 npm install
-```
+````
 
-Then install **Graphviz**, which is required for the high-performance `--use-dot` mode.
+Then install **Graphviz**, required for the high-performance `--use-dot` mode.
 
 ### Install Graphviz
 
-**macOS:**
+**macOS**
 
 ```bash
 brew install graphviz
 ```
 
-**Ubuntu / Debian:**
+**Ubuntu / Debian**
 
 ```bash
-sudo apt update && sudo apt install graphviz -y
+sudo apt update && sudo apt install -y graphviz
 ```
 
-**Fedora / RHEL:**
+**Fedora / RHEL**
 
 ```bash
-sudo dnf install graphviz -y
+sudo dnf install -y graphviz
 ```
 
-**Alpine (for CI containers):**
+**Alpine (for CI containers)**
 
 ```bash
 apk add --no-cache graphviz
 ```
 
-Check installation:
+Verify installation:
 
 ```bash
 dot -V
@@ -58,30 +59,22 @@ dot -V
 
 ---
 
-## 🧠 WASM vs Binary Layout
+## ⚙️ WASM vs Binary Layout
 
-LikeC4 uses Graphviz internally to calculate how diagrams are laid out.
-You can choose **two layout backends** depending on your environment:
+| Mode                     | Description                                   | Pros                         | Cons                                                  |
+| ------------------------ | --------------------------------------------- | ---------------------------- | ----------------------------------------------------- |
+| **WASM (default)**       | Uses Graphviz → WebAssembly built into LikeC4 | ✅ Zero setup · Runs anywhere | ❌ Slower · Heavier memory · May hang on complex views |
+| **Binary (`--use-dot`)** | Uses your system Graphviz binary (`dot`)      | ✅ Fast · Stable · Low memory | ❌ Requires Graphviz installed                         |
 
-| Mode                       | Description                                                   | Pros                                                                              | Cons                                                                                          |
-| -------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **`wasm` (default)**       | Uses Graphviz compiled to **WebAssembly**, built into LikeC4. | ✅ No installation needed<br>✅ Works anywhere Node runs                          | ❌ Slower for large diagrams<br>❌ Higher memory usage<br>❌ Can freeze on very complex views |
-| **`binary` (`--use-dot`)** | Uses your **local Graphviz binary (`dot`)** for layout.       | ✅ Fastest and most stable<br>✅ Handles large diagrams easily<br>✅ Lower memory | ❌ Requires Graphviz installed                                                                |
-
-### Summary
-
-> **WASM** = Portable and self-contained
-> **Binary** = Native and high-performance
-
-If Graphviz is installed, **always use binary layout** for production or CI builds.
+> 💡 **Tip:** For CI/CD (e.g. GitHub Actions), always use `--use-dot` for consistent layouts.
 
 ---
 
-## 🧩 Commands
+## Commands
 
-### 1. Build diagrams
+### Build diagrams
 
-Generates a production-ready static build of all `.c4` files under `src/c4`:
+Generate a production-ready static site from all `.c4` files under `src/c4`:
 
 ```bash
 npm run build:c4
@@ -90,78 +83,113 @@ npm run build:c4
 **Under the hood:**
 
 ```bash
-likec4 build src/c4 --use-dot
+likec4 build src/c4 -o ./dist --use-dot --use-hash-history
 ```
 
-Output will be written to `src/c4/dist/`.
+Output → `dist/`
 
 ---
 
-### 2. Preview diagrams
+### Preview diagrams
 
-Starts a local web server for previewing generated diagrams:
+Build + serve locally for quick preview:
 
 ```bash
 npm run preview:c4
 ```
 
-**Under the hood:**
+**Equivalent to:**
 
 ```bash
-npm run build:c4 && likec4 preview src/c4/dist
+npm run build:c4 && npx serve dist -l 62001
 ```
 
-Default preview URL:
-👉 [http://127.0.0.1:62001/](http://127.0.0.1:62001/)
+Then open → [http://127.0.0.1:62001](http://127.0.0.1:62001)
 
 ---
 
-### 3. Export to JSON
+### Export to JSON
 
-Export your LikeC4 model for integration with pipelines, dashboards, or analysis tools:
+Export your LikeC4 model for further processing:
 
 ```bash
-npx likec4 export json -o ./exports/likec4.json src/c4
+npm run export:c4
+```
+
+**Equivalent to:**
+
+```bash
+likec4 export json src/c4 --outfile ./exports/views.json --use-dot
 ```
 
 ---
 
-## Optional: Safe Fallback for Pipelines
+## CI / CD ( GitHub Pages )
 
-If Graphviz isn’t available (e.g. in lightweight CI containers), you can fall back to WASM automatically:
+This repository includes a ready-to-use GitHub Actions workflow:
+`.github/workflows/deploy.yml`
+
+It:
+
+1. Installs Graphviz
+2. Builds diagrams with `npm run build:c4`
+3. Publishes `dist/` to GitHub Pages
+
+```yaml
+- name: Install Graphviz
+  run: sudo apt-get update && sudo apt-get install -y graphviz
+```
+
+> Your pages will be served automatically at:
+> **https://<user>.github.io/<repo>/**
+
+---
+
+## Optional: Fallback Build Script
+
+If Graphviz is unavailable (e.g. in lightweight containers):
 
 ```bash
 if command -v dot &> /dev/null; then
-  echo "Graphviz found → using binary layout"
+  echo "✅ Graphviz found → using binary layout"
   npx likec4 build src/c4 --use-dot
 else
-  echo "Graphviz not found → using wasm layout"
+  echo "⚠️ Graphviz missing → falling back to WASM layout"
   npx likec4 build src/c4
 fi
 ```
 
 ---
 
-## Example `.likec4rc.json`
+## Example `likec4.config.json`
 
 ```json
 {
-  "workspace": "src/c4",
-  "outDir": "dist",
-  "layout": "binary",
-  "printErrors": false
+  "$schema": "https://likec4.dev/schemas/config.json",
+  "name": "project-name",
+  "styles": {
+    "defaults": {
+      "border": "dashed",
+      "opacity": 100,
+      "size": "md",
+      "color": "primary",
+      "group": { "color": "primary", "opacity": 10, "border": "dashed" },
+      "relationship": { "color": "gray", "line": "dashed", "arrow": "normal" }
+    }
+  }
 }
 ```
 
 ---
 
-## Example `.c4` File
+## Example C4 File
 
 ```c4
 system coordinator 'Coordinator Service' {
   component kafka 'Kafka Cluster'
   component mongo 'Mongo Cluster'
   component l2 'L2 Match Service'
+
   coordinator -> kafka 'produces match events'
   l2 -> mongo 'persists match data'
 }
