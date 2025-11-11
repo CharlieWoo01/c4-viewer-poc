@@ -1,13 +1,5 @@
-// ✅ Fully valid LikeC4 v1.38 syntax
 // Coordinator -> multiple L2 services -> Kafka + Mongo
-
-specification {
-  element actor
-  element system
-  element component
-  element queue
-  element datastore
-}
+// Works with shared specification.c4
 
 model {
 

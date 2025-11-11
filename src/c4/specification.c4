@@ -1,0 +1,7 @@
+specification {
+  element actor
+  element system
+  element component
+  element queue
+  element datastore
+}

@@ -1,0 +1,184 @@
+// Mission Architecture — Coordinator -> L2 Services -> Kafka + Mongo
+// Works with shared specification.c4
+
+model {
+
+  actor mission_client 'External Client' {
+    description 'Public consumer calling Coordinator APIs'
+  }
+
+  actor mission_admin 'Admin Dashboard' {
+    description 'Internal administrator using internal APIs'
+  }
+
+  system mission_coordinator 'Coordinator Service' {
+    description 'Handles orchestration between all L2 services'
+    style { icon tech:spring shape rectangle }
+
+    component mission_gateway 'API Gateway' {
+      description 'Routes and authenticates requests'
+      style { icon tech:nginx shape rectangle }
+    }
+
+    component mission_orchestrator 'Coordinator Core' {
+      description 'Coordinates cross-service workflows'
+      style { icon tech:java shape rectangle }
+    }
+
+    mission_gateway -> mission_orchestrator 'routes traffic'
+  }
+
+  queue mission_kafka 'Kafka Cluster' {
+    description 'Event streaming platform for all L2 services'
+    style { icon tech:kafka shape queue }
+  }
+
+  datastore mission_globalmongo 'Mongo Cluster' {
+    description 'Shared MongoDB storage for persistent data'
+    style { icon tech:mongodb shape cylinder }
+  }
+
+  // ---- Ten L2 services ----
+  system mission_l2teams 'L2 Teams Service' {
+    component mission_teams_api 'Teams API'
+    component mission_teams_consumer 'Teams Consumer'
+    datastore mission_teams_db 'Teams Mongo'
+    mission_teams_api -> mission_teams_consumer 'publishes domain events'
+    mission_teams_consumer -> mission_teams_db 'persists data'
+  }
+
+  system mission_l2matches 'L2 Matches Service' {
+    component mission_matches_api 'Matches API'
+    component mission_matches_consumer 'Matches Consumer'
+    datastore mission_matches_db 'Matches Mongo'
+    mission_matches_api -> mission_matches_consumer 'publishes domain events'
+    mission_matches_consumer -> mission_matches_db 'persists data'
+  }
+
+  system mission_l2stats 'L2 Stats Service' {
+    component mission_stats_api 'Stats API'
+    component mission_stats_consumer 'Stats Consumer'
+    datastore mission_stats_db 'Stats Mongo'
+    mission_stats_api -> mission_stats_consumer 'publishes domain events'
+    mission_stats_consumer -> mission_stats_db 'persists data'
+  }
+
+  system mission_l2awards 'L2 Awards Service' {
+    component mission_awards_api 'Awards API'
+    component mission_awards_consumer 'Awards Consumer'
+    datastore mission_awards_db 'Awards Mongo'
+    mission_awards_api -> mission_awards_consumer 'publishes domain events'
+    mission_awards_consumer -> mission_awards_db 'persists data'
+  }
+
+  system mission_l2notifications 'L2 Notifications Service' {
+    component mission_notif_api 'Notifications API'
+    component mission_notif_consumer 'Notifications Consumer'
+    datastore mission_notif_db 'Notifications Mongo'
+    mission_notif_api -> mission_notif_consumer 'publishes domain events'
+    mission_notif_consumer -> mission_notif_db 'persists data'
+  }
+
+  system mission_l2payments 'L2 Payments Service' {
+    component mission_payments_api 'Payments API'
+    component mission_payments_consumer 'Payments Consumer'
+    datastore mission_payments_db 'Payments Mongo'
+    mission_payments_api -> mission_payments_consumer 'publishes domain events'
+    mission_payments_consumer -> mission_payments_db 'persists data'
+  }
+
+  system mission_l2analytics 'L2 Analytics Service' {
+    component mission_analytics_api 'Analytics API'
+    component mission_analytics_consumer 'Analytics Consumer'
+    datastore mission_analytics_db 'Analytics Mongo'
+    mission_analytics_api -> mission_analytics_consumer 'publishes domain events'
+    mission_analytics_consumer -> mission_analytics_db 'persists data'
+  }
+
+  system mission_l2reporting 'L2 Reporting Service' {
+    component mission_reporting_api 'Reporting API'
+    component mission_reporting_consumer 'Reporting Consumer'
+    datastore mission_reporting_db 'Reporting Mongo'
+    mission_reporting_api -> mission_reporting_consumer 'publishes domain events'
+    mission_reporting_consumer -> mission_reporting_db 'persists data'
+  }
+
+  system mission_l2users 'L2 Users Service' {
+    component mission_users_api 'Users API'
+    component mission_users_consumer 'Users Consumer'
+    datastore mission_users_db 'Users Mongo'
+    mission_users_api -> mission_users_consumer 'publishes domain events'
+    mission_users_consumer -> mission_users_db 'persists data'
+  }
+
+  system mission_l2discord 'L2 Discord Service' {
+    component mission_discord_api 'Discord API'
+    component mission_discord_consumer 'Discord Consumer'
+    datastore mission_discord_db 'Discord Mongo'
+    mission_discord_api -> mission_discord_consumer 'publishes domain events'
+    mission_discord_consumer -> mission_discord_db 'persists data'
+  }
+
+  // ---- Relationships ----
+  mission_client -> mission_coordinator 'invokes public endpoints'
+  mission_admin -> mission_coordinator 'manages configuration'
+
+  mission_coordinator -> mission_kafka 'publishes orchestration events'
+
+  mission_coordinator -> mission_l2teams 'delegates to Teams'
+  mission_coordinator -> mission_l2matches 'delegates to Matches'
+  mission_coordinator -> mission_l2stats 'delegates to Stats'
+  mission_coordinator -> mission_l2awards 'delegates to Awards'
+  mission_coordinator -> mission_l2notifications 'delegates to Notifications'
+  mission_coordinator -> mission_l2payments 'delegates to Payments'
+  mission_coordinator -> mission_l2analytics 'delegates to Analytics'
+  mission_coordinator -> mission_l2reporting 'delegates to Reporting'
+  mission_coordinator -> mission_l2users 'delegates to Users'
+  mission_coordinator -> mission_l2discord 'delegates to Discord'
+
+  // L2 → infra
+  mission_l2teams -> mission_kafka 'publishes domain events'
+  mission_l2matches -> mission_kafka 'publishes domain events'
+  mission_l2stats -> mission_kafka 'publishes domain events'
+  mission_l2awards -> mission_kafka 'publishes domain events'
+  mission_l2notifications -> mission_kafka 'publishes domain events'
+  mission_l2payments -> mission_kafka 'publishes domain events'
+  mission_l2analytics -> mission_kafka 'publishes domain events'
+  mission_l2reporting -> mission_kafka 'publishes domain events'
+  mission_l2users -> mission_kafka 'publishes domain events'
+  mission_l2discord -> mission_kafka 'publishes domain events'
+
+  mission_kafka -> mission_l2analytics 'delivers topic events'
+  mission_kafka -> mission_l2reporting 'delivers topic events'
+
+  mission_l2teams -> mission_globalmongo 'persists team data'
+  mission_l2matches -> mission_globalmongo 'persists match data'
+  mission_l2stats -> mission_globalmongo 'persists stats data'
+  mission_l2awards -> mission_globalmongo 'persists awards data'
+  mission_l2notifications -> mission_globalmongo 'persists notification data'
+  mission_l2payments -> mission_globalmongo 'persists payment data'
+  mission_l2analytics -> mission_globalmongo 'persists analytics data'
+  mission_l2reporting -> mission_globalmongo 'persists reports'
+  mission_l2users -> mission_globalmongo 'persists user data'
+  mission_l2discord -> mission_globalmongo 'persists Discord data'
+}
+
+views {
+  view mission_index {
+    title 'Mission Gaming — Microservice Landscape'
+    include *
+    autoLayout LeftRight
+  }
+
+  view mission_coordinator of mission_coordinator {
+    title 'Coordinator Detail'
+    include *
+    autoLayout TopBottom
+  }
+
+  view mission_l2analytics of mission_l2analytics {
+    title 'Analytics Service Detail'
+    include *
+    autoLayout TopBottom
+  }
+}
